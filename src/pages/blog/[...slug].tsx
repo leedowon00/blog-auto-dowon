@@ -167,18 +167,22 @@ export const getStaticPaths: GetStaticPaths = async () => {
     });
 
     // Add empty categories (created folders but no posts yet)
-    // We should scan directories to be sure, but for now relying on posts is safer for build.
-    // However, user created empty folders. We should scan them.
     const blogDir = path.join(process.cwd(), 'blog');
 
     function scanDirs(dir: string, base: string[] = []) {
         if (!fs.existsSync(dir)) return;
         const files = fs.readdirSync(dir);
+
+        // 현재 디렉토리도 카테고리 경로에 추가 (base가 비어있지 않다면)
+        if (base.length > 0) {
+            categoryPaths.add(base.join('/'));
+        }
+
         files.forEach(file => {
             const fullPath = path.join(dir, file);
             if (fs.statSync(fullPath).isDirectory()) {
                 const newBase = [...base, file];
-                categoryPaths.add(newBase.join('/'));
+                // 재귀 호출
                 scanDirs(fullPath, newBase);
             }
         });

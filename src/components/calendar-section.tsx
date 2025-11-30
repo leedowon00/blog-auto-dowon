@@ -140,7 +140,9 @@ export default function CalendarSection() {
   }
 
   const weekDays = useMemo(() => {
-    const start = startOfWeek(currentDate, { locale: ko })
+    // 사용자의 요청에 따라 주간 뷰에서는 '오늘'(currentDate)부터 7일을 보여줍니다.
+    // 기존: const start = startOfWeek(currentDate, { locale: ko })
+    const start = currentDate
     return Array.from({ length: 7 }).map((_, idx) => addDays(start, idx))
   }, [currentDate])
 

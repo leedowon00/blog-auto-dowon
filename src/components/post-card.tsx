@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { PostMeta } from '@/lib/types';
 import { getTagColor, getTagIcon } from '@/lib/constants';
-import { Calendar, Folder } from 'lucide-react';
+import { Calendar, Folder, Pin } from 'lucide-react';
 
 interface PostCardProps {
     post: PostMeta;
@@ -23,8 +23,9 @@ export default function PostCard({ post }: PostCardProps) {
         <Link href={postPath} className="block group">
             <Card className="h-full transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 border-border/60 hover:border-primary/30">
                 <CardHeader className="pb-3">
-                    <CardTitle className="text-xl group-hover:text-primary transition-colors line-clamp-2">
-                        {post.title}
+                    <CardTitle className="text-xl group-hover:text-primary transition-colors line-clamp-2 flex items-start gap-2">
+                        {post.pinned && <Pin className="h-5 w-5 text-primary fill-primary rotate-45 shrink-0 mt-1" />}
+                        <span>{post.title}</span>
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="pb-3">

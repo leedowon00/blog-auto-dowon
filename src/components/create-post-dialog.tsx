@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { PenTool } from "lucide-react"
 import { useRouter } from "next/router"
 import { RichTextEditor } from "@/components/rich-text-editor"
@@ -31,6 +32,7 @@ export function CreatePostDialog({ category }: CreatePostDialogProps) {
     const [title, setTitle] = useState("")
     const [content, setContent] = useState("")
     const [tags, setTags] = useState("")
+    const [pinned, setPinned] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const router = useRouter()
 
@@ -52,6 +54,7 @@ export function CreatePostDialog({ category }: CreatePostDialogProps) {
                     content: markdown,
                     tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
                     category,
+                    pinned,
                 }),
             })
 
@@ -60,6 +63,7 @@ export function CreatePostDialog({ category }: CreatePostDialogProps) {
                 setTitle("")
                 setContent("")
                 setTags("")
+                setPinned(false)
                 // Refresh the page to show the new post
                 router.replace(router.asPath)
             } else {
@@ -103,6 +107,14 @@ export function CreatePostDialog({ category }: CreatePostDialogProps) {
                             onChange={(e) => setTags(e.target.value)}
                             placeholder="예: 영어, 회화, 공부"
                         />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id="pinned"
+                            checked={pinned}
+                            onCheckedChange={(checked) => setPinned(checked as boolean)}
+                        />
+                        <Label htmlFor="pinned" className="cursor-pointer">이 글을 상단에 고정</Label>
                     </div>
                     <div className="grid gap-2 flex-1">
                         <Label>내용</Label>

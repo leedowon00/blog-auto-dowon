@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Edit } from "lucide-react"
 import { useRouter } from "next/router"
 import { Post } from "@/lib/types"
@@ -33,6 +34,7 @@ export function EditPostDialog({ post }: EditPostDialogProps) {
     const [title, setTitle] = useState(post.title)
     const [content, setContent] = useState("")
     const [tags, setTags] = useState(post.tags.join(", "))
+    const [pinned, setPinned] = useState(post.pinned || false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const router = useRouter()
 
@@ -41,6 +43,7 @@ export function EditPostDialog({ post }: EditPostDialogProps) {
         if (isOpen) {
             setTitle(post.title)
             setTags(post.tags.join(", "))
+            setPinned(post.pinned || false)
             // Convert markdown to HTML for the editor
             const htmlContent = marked(post.content) as string
             setContent(htmlContent)
@@ -66,6 +69,7 @@ export function EditPostDialog({ post }: EditPostDialogProps) {
                     title,
                     content: markdown,
                     tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+                    pinned,
                 }),
             })
 
@@ -114,6 +118,14 @@ export function EditPostDialog({ post }: EditPostDialogProps) {
                             onChange={(e) => setTags(e.target.value)}
                             placeholder="예: 영어, 회화, 공부"
                         />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id="pinned"
+                            checked={pinned}
+                            onCheckedChange={(checked) => setPinned(checked as boolean)}
+                        />
+                        <Label htmlFor="pinned" className="cursor-pointer">이 글을 상단에 고정</Label>
                     </div>
                     <div className="grid gap-2 flex-1">
                         <Label>내용</Label>

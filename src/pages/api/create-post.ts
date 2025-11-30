@@ -9,7 +9,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     try {
-        const { title, content, category, tags } = req.body;
+        const { title, content, category, tags, pinned } = req.body;
 
         if (!title || !category) {
             return res.status(400).json({ message: 'Title and category are required' });
@@ -42,12 +42,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         // Create frontmatter
         const tagList = Array.isArray(tags) ? tags : (tags ? tags.split(',').map((t: string) => t.trim()) : []);
         const tagStr = JSON.stringify(tagList);
+        const isPinned = pinned === true || pinned === 'true';
 
         const fileContent = `---
 title: "${title}"
 date: "${dateStr}"
 tags: ${tagStr}
-pinned: false
+pinned: ${isPinned}
 ---
 
 ${content}
