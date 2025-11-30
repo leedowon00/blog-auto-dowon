@@ -78,11 +78,13 @@ export function EditPostDialog({ post }: EditPostDialogProps) {
                 // Refresh the page to show the updated post
                 router.replace(router.asPath)
             } else {
-                alert("Failed to update post")
+                const errorData = await res.json()
+                console.error('Update failed:', errorData)
+                alert(`Failed to update post: ${errorData.message || 'Unknown error'}${errorData.path ? '\n\nPath: ' + errorData.path : ''}`)
             }
         } catch (error) {
-            console.error(error)
-            alert("Error updating post")
+            console.error('Update error:', error)
+            alert(`Error updating post: ${error}`)
         } finally {
             setIsSubmitting(false)
         }
