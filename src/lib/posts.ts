@@ -43,15 +43,15 @@ export function getSortedPostsData(): PostMeta[] {
         // 경로에서 카테고리와 슬러그 추출
         // 예: .../blog/회화 MASTER/영어/2025-11-28-test.md
         // relativePath: 회화 MASTER/영어/2025-11-28-test.md
-        const relativePath = path.relative(postsDirectory, fullPath);
-        const pathParts = relativePath.split(path.sep);
+        // Windows에서도 forward slash로 변환하여 처리
+        const relativePath = path.relative(postsDirectory, fullPath).split(path.sep).join('/');
+        const pathParts = relativePath.split('/');
 
         // 파일명 (마지막 요소)
         const fileName = pathParts[pathParts.length - 1];
         const slug = fileName.replace(/\.md$/, '');
 
         // 카테고리 (파일명 제외한 앞부분)
-        // 예: ["회화 MASTER", "영어"] -> "회화 MASTER/영어"
         const category = pathParts.slice(0, -1).join('/');
 
         // 날짜 처리
@@ -90,14 +90,13 @@ export function getSortedPostsData(): PostMeta[] {
 /**
  * 모든 포스트의 경로(Category, Slug) 목록을 반환합니다.
  * Next.js의 getStaticPaths에서 사용됩니다.
- * 주의: category가 슬래시(/)를 포함할 수 있으므로 [...slug] catch-all 라우트를 사용하는 것이 좋습니다.
  */
 export function getAllPostIds() {
     const allFiles = getAllMdFiles(postsDirectory);
 
     return allFiles.map(fullPath => {
-        const relativePath = path.relative(postsDirectory, fullPath);
-        const pathParts = relativePath.split(path.sep);
+        const relativePath = path.relative(postsDirectory, fullPath).split(path.sep).join('/');
+        const pathParts = relativePath.split('/');
         const fileName = pathParts[pathParts.length - 1];
         const slug = fileName.replace(/\.md$/, '');
         const category = pathParts.slice(0, -1).join('/');
@@ -116,13 +115,13 @@ export function getAllPostIds() {
  * category가 중첩될 수 있으므로, category path를 받아서 처리합니다.
  */
 export async function getPostData(category: string, slug: string): Promise<Post> {
-    // category는 URL에서 인코딩되어 올 수 있으므로 디코딩 필요할 수 있음 (Next.js가 처리해줌)
-    // category가 "회화 MASTER/영어" 처럼 슬래시를 포함할 수 있음.
-    // 하지만 파일 시스템에서는 OS에 맞는 구분자를 써야 함.
+    // URL 디코딩 (한글 경로 처리)
+    const decodedCategory = decodeURIComponent(category);
+    const decodedSlug = decodeURIComponent(slug);
 
-    // category 문자열을 OS path separator로 변환
-    const categoryPath = category.split('/').join(path.sep);
-    const fullPath = path.join(postsDirectory, categoryPath, `${slug}.md`);
+    // OS에 맞는 경로 구분자로 변환
+    const categoryPath = decodedCategory.split('/').join(path.sep);
+    const fullPath = path.join(postsDirectory, categoryPath, `${decodedSlug}.md`);
 
     const fileContents = fs.readFileSync(fullPath, 'utf8');
     const matterResult = matter(fileContents);

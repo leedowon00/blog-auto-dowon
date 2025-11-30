@@ -200,19 +200,23 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         return { notFound: true };
     }
 
-    const slugPath = params.slug.join('/');
+    // URL 디코딩 (한글 경로 문제 해결)
+    const decodedSlug = params.slug.map(part => decodeURIComponent(part));
+    const slugPath = decodedSlug.join('/');
     const blogDir = path.join(process.cwd(), 'blog');
 
     // Check if it is a file (Post)
     // Construct path: blog/slugPath.md
     // Note: slugPath includes category/slug.
     // e.g. "회화 MASTER/영어/post1" -> blog/회화 MASTER/영어/post1.md
-    const filePath = path.join(blogDir, slugPath + '.md');
+    // OS에 맞는 구분자로 변환하여 파일 시스템 접근
+    const fsSlugPath = decodedSlug.join(path.sep);
+    const filePath = path.join(blogDir, fsSlugPath + '.md');
 
     if (fs.existsSync(filePath)) {
         // It's a post
-        const slug = params.slug[params.slug.length - 1];
-        const category = params.slug.slice(0, -1).join('/');
+        const slug = decodedSlug[decodedSlug.length - 1];
+        const category = decodedSlug.slice(0, -1).join('/');
         const postData = await getPostData(category, slug);
         return {
             props: {
@@ -223,12 +227,13 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     }
 
     // Check if it is a directory (Category)
-    const dirPath = path.join(blogDir, slugPath);
+    const dirPath = path.join(blogDir, fsSlugPath);
     if (fs.existsSync(dirPath) && fs.statSync(dirPath).isDirectory()) {
         // It's a category
         // Get all posts that belong to this category (or subcategories)
         const allPosts = getSortedPostsData();
         // Filter: post.category starts with slugPath
+        // post.category는 항상 '/' 구분자를 사용함 (posts.ts 수정 덕분)
         const categoryPosts = allPosts.filter(p =>
             p.category === slugPath || p.category.startsWith(slugPath + '/')
         );

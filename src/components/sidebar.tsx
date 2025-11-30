@@ -129,15 +129,17 @@ function SidebarItem({ item, pathname, level = 0 }: { item: CategoryItem; pathna
                 <div className="flex items-center w-full">
                     {item.href ? (
                         <>
-                            <Button
-                                variant={isActive ? "secondary" : "ghost"}
-                                className="flex-1 justify-start hover:bg-muted/50"
-                                style={{ paddingLeft: `${level * 12 + 12}px` }}
-                                onClick={() => setIsOpen(!isOpen)}
-                            >
-                                {level === 0 && <Hash className="mr-2 h-4 w-4" />}
-                                {item.title}
-                            </Button>
+                            <Link href={item.href} className="flex-1">
+                                <Button
+                                    variant={isActive ? "secondary" : "ghost"}
+                                    className="w-full justify-start hover:bg-muted/50"
+                                    style={{ paddingLeft: `${level * 12 + 12}px` }}
+                                    onClick={() => setIsOpen(true)}
+                                >
+                                    {level === 0 && <Hash className="mr-2 h-4 w-4" />}
+                                    {item.title}
+                                </Button>
+                            </Link>
                             <Button
                                 variant="ghost"
                                 size="icon"
