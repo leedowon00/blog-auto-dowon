@@ -81,6 +81,21 @@ export default function CalendarSection() {
     }
   }, [])
 
+  // 날짜 변경 시 해당 날짜로 스크롤 (월간 뷰에서 유용)
+  useEffect(() => {
+    // 약간의 지연을 주어 렌더링 후 스크롤되도록 함
+    const timer = setTimeout(() => {
+      if (viewMode === 'month') {
+        const dateId = `date-${format(currentDate, 'yyyy-MM-dd')}`
+        const element = document.getElementById(dateId)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [currentDate, viewMode])
+
   const persistEvents = (nextEvents: CalendarEvent[]) => {
     setEvents(nextEvents)
     if (typeof window !== "undefined") {
@@ -325,6 +340,7 @@ export default function CalendarSection() {
                   days.push(
                     <div
                       key={thisDay.toISOString()}
+                      id={`date-${format(thisDay, 'yyyy-MM-dd')}`}
                       onClick={() => handleDaySlotClick(thisDay)}
                       className={cn(
                         "min-h-[120px] rounded-lg border p-3 cursor-pointer",

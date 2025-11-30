@@ -104,17 +104,26 @@ export function Sidebar() {
 }
 
 function SidebarItem({ item, pathname, level = 0 }: { item: CategoryItem; pathname: string | null; level?: number }) {
-    const [isOpen, setIsOpen] = React.useState(false)
     const isActive = item.href ? pathname === item.href : false
 
     // Check if any descendant is active
     const hasActiveChild = React.useMemo(() => {
         const checkActive = (items?: CategoryItem[]): boolean => {
             if (!items) return false
-            return items.some(sub => (sub.href === pathname) || checkActive(sub.items))
+            return items.some(sub => {
+                // URL 인코딩/디코딩 문제 해결을 위해 안전하게 비교
+                const normalize = (str: string) => decodeURIComponent(str).normalize();
+                const currentPath = normalize(pathname || '');
+                const targetPath = normalize(sub.href || '');
+
+                return (targetPath === currentPath) || checkActive(sub.items)
+            })
         }
         return checkActive(item.items)
     }, [item.items, pathname])
+
+    // 초기값을 hasActiveChild로 설정하여 깜빡임 방지 및 상태 유지
+    const [isOpen, setIsOpen] = React.useState(hasActiveChild)
 
     // 하위 항목이 활성화되어 있으면 자동으로 펼침
     React.useEffect(() => {

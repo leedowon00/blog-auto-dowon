@@ -67,6 +67,9 @@ export function getSortedPostsData(): PostMeta[] {
             title = fileName.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '').replace(/-/g, ' ');
         }
 
+        // pinned 값 안전하게 처리
+        const pinned = matterResult.data.pinned === true || matterResult.data.pinned === 'true';
+
         return {
             slug,
             title,
@@ -74,14 +77,17 @@ export function getSortedPostsData(): PostMeta[] {
             category,
             tags: matterResult.data.tags || [],
             summary: matterResult.data.summary || '',
-            pinned: matterResult.data.pinned || false,
+            pinned,
         };
     });
 
     // 날짜순 정렬 (pinned 우선)
     return allPostsData.sort((a, b) => {
-        if (a.pinned && !b.pinned) return -1;
-        if (!a.pinned && b.pinned) return 1;
+        const pinnedA = a.pinned === true;
+        const pinnedB = b.pinned === true;
+
+        if (pinnedA && !pinnedB) return -1;
+        if (!pinnedA && pinnedB) return 1;
         if (a.date < b.date) return 1;
         else return -1;
     });
