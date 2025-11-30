@@ -112,7 +112,15 @@ function SidebarItem({ item, pathname, level = 0 }: { item: CategoryItem; pathna
             if (!items) return false
             return items.some(sub => {
                 // URL 인코딩/디코딩 문제 해결을 위해 안전하게 비교
-                const normalize = (str: string) => decodeURIComponent(str).normalize();
+                const normalize = (str: string) => {
+                    try {
+                        // 이미 디코딩된 경로일 수 있으므로 안전하게 처리
+                        return decodeURIComponent(str).normalize();
+                    } catch {
+                        // 디코딩 실패 시 원본 사용
+                        return str.normalize();
+                    }
+                };
                 const currentPath = normalize(pathname || '');
                 const targetPath = normalize(sub.href || '');
 

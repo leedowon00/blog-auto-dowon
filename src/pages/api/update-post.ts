@@ -15,10 +15,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             return res.status(400).json({ message: 'Category, slug, and content are required' });
         }
 
+        // URL 디코딩 (한글 경로 처리)
+        const decodedCategory = decodeURIComponent(category);
+        const decodedSlug = decodeURIComponent(slug);
+
         // Construct file path
         const blogDir = path.join(process.cwd(), 'blog');
-        const categoryPath = category.split('/').join(path.sep);
-        const filePath = path.join(blogDir, categoryPath, `${slug}.md`);
+        const categoryPath = decodedCategory.split('/').join(path.sep);
+        const filePath = path.join(blogDir, categoryPath, `${decodedSlug}.md`);
 
         if (!fs.existsSync(filePath)) {
             return res.status(404).json({ message: 'Post not found' });
@@ -28,12 +32,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         const fileContents = fs.readFileSync(filePath, 'utf8');
         const { data: existingData } = matter(fileContents);
 
-        // Update frontmatter
+        // Update frontmatter - title은 필수값이므로 항상 설정
         const newData = {
             ...existingData,
-            title: title || existingData.title,
-            tags: tags || existingData.tags,
-            pinned: pinned !== undefined ? pinned : existingData.pinned,
+            title: title || existingData.title || 'Untitled',
+            tags: tags !== undefined ? tags : existingData.tags,
+            pinned: pinned !== undefined ? (pinned === true || pinned === 'true') : (existingData.pinned || false),
         };
 
         const newFileContent = matter.stringify(content, newData);

@@ -81,21 +81,6 @@ export default function CalendarSection() {
     }
   }, [])
 
-  // 날짜 변경 시 해당 날짜로 스크롤 (월간 뷰에서 유용)
-  useEffect(() => {
-    // 약간의 지연을 주어 렌더링 후 스크롤되도록 함
-    const timer = setTimeout(() => {
-      if (viewMode === 'month') {
-        const dateId = `date-${format(currentDate, 'yyyy-MM-dd')}`
-        const element = document.getElementById(dateId)
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        }
-      }
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [currentDate, viewMode])
-
   const persistEvents = (nextEvents: CalendarEvent[]) => {
     setEvents(nextEvents)
     if (typeof window !== "undefined") {
@@ -151,6 +136,23 @@ export default function CalendarSection() {
       setCurrentDate((prev) => addWeeks(prev, direction === "next" ? 1 : -1))
     } else {
       setCurrentDate((prev) => addDays(prev, direction === "next" ? 1 : -1))
+    }
+  }
+
+  // "오늘" 버튼 클릭 시 오늘 날짜로 이동하고 월간 뷰에서만 스크롤
+  const handleTodayClick = () => {
+    const today = new Date()
+    setCurrentDate(today)
+
+    // 월간 뷰에서만 스크롤 (약간의 지연을 주어 렌더링 후 스크롤)
+    if (viewMode === 'month') {
+      setTimeout(() => {
+        const dateId = `date-${format(today, 'yyyy-MM-dd')}`
+        const element = document.getElementById(dateId)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }, 150)
     }
   }
 
@@ -290,7 +292,7 @@ export default function CalendarSection() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentDate(new Date())}
+            onClick={handleTodayClick}
           >
             오늘
           </Button>
